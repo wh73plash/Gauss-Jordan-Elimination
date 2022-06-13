@@ -121,13 +121,15 @@ int32_t main(const int32_t argc, const char** argv, const char** env) {
     std::cout.tie(nullptr);
     
     // insert code here...
-    int size;
+    int rsize, csize;
     matrix input;
-    std::cout << "please enter size of matrix : ";
-    std::cin >> size;
+    std::cout << "please enter size of matrix of row : ";
+    std::cin >> rsize;
+    std::cout << "please enter size of matrix of column : ";
+    std::cin >> csize;
     std::cout << "-please enter matrix-\n";
-    for(int n = 0; n < size; ++n){
-        std::vector<double> row(size);
+    for(int n = 0; n < csize; ++n){
+        std::vector<double> row(rsize);
         for(auto& i : row){
             std::cin >> i;
         }
