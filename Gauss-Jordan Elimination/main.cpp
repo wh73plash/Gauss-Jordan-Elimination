@@ -7,59 +7,126 @@
 
 #include <iostream>
 #include <vector>
-#include <stdlib.h>
+#include <cstdlib>
 
 const double epsilon = 0.0000000001;
 
-double absolute(double num){
-    return num *= num < 0 ? -1 : 1;
-}
-
-int32_t non_zero(std::vector<double>& r){
-    for(int i = 0; i < r.size(); ++i){
-        if(absolute(r[i]) >= epsilon){
-            return i;
-        }else{
-            continue;
-        }
-    }
-    return -1;
-}
+using namespace std;
 
 class matrix{
 private:
     std::vector<std::vector<double>> m;
+    
+    inline double absolute(double num){
+        return num *= num < 0 ? -1 : 1;
+    }
+    
+    inline int32_t non_zero(std::vector<double>& r){
+        for(int i = 0; i < r.size(); ++i){
+            if(absolute(r[i]) >= epsilon){
+                return i;
+            }else{
+                continue;
+            }
+        }
+        return -1;
+    }
+    
+    inline int32_t zero(std::vector<double>& row){
+        for(int i = 0; i < row.size(); ++i){
+            if(row[i] != 0 || row[i] != -0){
+                return i;
+            }else{
+                continue;
+            }
+        }
+        return -1;
+    }
+    
+    inline void row_exchangeB(std::vector<std::pair<int, int>>& rows){
+        for(int i = (int)rows.size() - 1; i > 0; --i){
+            for(int j = 0; j < i; ++j){
+                if(rows[j].second < rows[j + 1].second){
+                    auto buffer = rows[j];
+                    rows[j] = rows[j + 1];
+                    rows[j + 1] = buffer;
+                    row_exchange(j, j + 1);
+                }
+            }
+        }
+        return;
+    }
+    
+    inline void row_exchangeA(){
+        bool ret = false;
+        std::vector<std::pair<int, int>> rows(this->m.size());
+        for(int i = 0; i < rows.size(); ++i){
+            rows[i].second = i;
+            rows[i].first = zero(m[i]);
+            if(rows[i].first != -1){
+                ret = true;
+            }else{
+                continue;
+            }
+        }
+        if(!ret){
+            return;
+        }else{
+            std::sort(rows.begin(), rows.end(), [](std::pair<int, int> a, std::pair<int, int> b){
+                if(a.first == b.first){
+                    return a > b;
+                }else{
+                    return a.first > b.first;
+                }
+            });
+            row_exchangeB(rows);
+        }
+        return;
+    }
 public:
     matrix(){ }~matrix(){ }
     
-    std::vector<double> at(int i){
+    inline void row_exchange(size_t a, size_t b){
+        std::vector<double> temp(this->m[a]);
+        for(int i = 0; i < this->m[a].size(); ++i){
+            this->m[a][i] = this->m[b][i];
+        }
+        for(int i = 0; i < this->m[b].size(); ++i){
+            this->m[b][i] = temp[i];
+        }
+        return;
+    }
+    
+    inline std::vector<double> at(int i){
         return this->m[i];
     }
     
-    double at(int i, int j){
+    inline double at(int i, int j){
         return this->m[i][j];
     }
     
-    void push_back(std::vector<double> row){
+    inline void push_back(std::vector<double> row){
         this->m.push_back(row);
         return;
     }
     
-    void mult_row(int row, double k){
+    inline void mult_row(int row, double k){
         for(auto& i : this->m[row]){
             i *= k;
         }
         this->print();
+        return;
     }
     
-    void mult_row_exchange(int n, int j, double k){
+    inline void mult_row_exchange(int n, int j, double k){
         for(size_t i = 0; i < this->m[0].size(); ++i){
             this->m[j][i] += k * this->m[n][i];
         }
         this->print();
+        return;
     }
     
-    void echelon(){
+    inline void echelon(){
         for(int i = 0; i < this->m.size()-1; ++i){
             int j = 0;
             if((j = non_zero(this->m[i])) == -1){
@@ -70,9 +137,10 @@ public:
                 }
             }
         }
+        return;
     }
     
-    void reduce_echelon(){
+    inline void reduce_echelon(){
         echelon();
         
         for(int i = 0; i < this->m.size(); ++i){
@@ -94,9 +162,11 @@ public:
                 }
             }
         }
+        return;
     }
     
-    void print(){
+    inline void print(){
+//        row_exchangeA();
         for(int i = 0; i < this->m[0].size() * 7; ++i){
             std::cout << '-';
         }
@@ -112,6 +182,7 @@ public:
             std::cout << '-';
         }
         std::cout << '\n';
+        return;
     }
 };
 
